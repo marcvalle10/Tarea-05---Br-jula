@@ -10,12 +10,6 @@ Aplicación móvil desarrollada en **Flutter** que implementa sensores reales de
 
 <br><br>
 
-<!-- Badges -->
-<img alt="Flutter" src="https://img.shields.io/badge/Flutter-Framework-blue">
-<img alt="Dart" src="https://img.shields.io/badge/Dart-Language-blue">
-<img alt="GitHub" src="https://img.shields.io/badge/GitHub-Repo-black">
-<img alt="Release" src="https://img.shields.io/badge/Release-1.0-green">
-
 </div>
 
 ---
@@ -104,7 +98,7 @@ lib/
 └── utils/
     ├── smoothing.dart
     └── formatters.dart
-
+```
 
 📸 Imágenes de la Aplicación
 <div align="center"> <table> <tr> <td align="center"> <b>Vista de Inicio</b><br><br> <img src="assets/screenshots/start_screen.png" width="260" alt="Start Screen"/> </td> <td align="center"> <b>Vista Brújula</b><br><br> <img src="assets/screenshots/compass_screen.png" width="260" alt="Compass Screen"/> </td> </tr> <tr> <td align="center"> <b>Ubicación en Tiempo Real</b><br><br> <img src="assets/screenshots/location_cards.png" width="260" alt="Location Cards"/> </td> <td align="center"> <b>Icono de la App</b><br><br> <img src="assets/screenshots/app_icon.png" width="140" alt="App Icon"/> </td> </tr> </table> </div>
