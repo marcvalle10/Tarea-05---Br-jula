@@ -1,81 +1,78 @@
+<div align="center">
+
 # 🧭 Brújula del Explorador
 
-Aplicación móvil desarrollada en Flutter que implementa sensores reales del dispositivo para mostrar la orientación (brújula digital) y la ubicación en tiempo real, integrando un diseño inspirado en mapas cartográficos antiguos.
+Aplicación móvil desarrollada en **Flutter** que implementa sensores reales del dispositivo para mostrar la orientación (brújula digital) y la ubicación en tiempo real, integrando un diseño inspirado en mapas cartográficos antiguos.
 
-# 👨‍💻 Autores
+<br>
 
-Marcos Vallejo
-Cecilia Casas
-Joshua Murillo
+<img src="assets/screenshots/app_icon.png" width="120" alt="App Icon"/>
 
-# Descripción
+<br><br>
 
-Brújula del Explorador es una aplicación móvil funcional que:
+<!-- Badges -->
+<img alt="Flutter" src="https://img.shields.io/badge/Flutter-Framework-blue">
+<img alt="Dart" src="https://img.shields.io/badge/Dart-Language-blue">
+<img alt="GitHub" src="https://img.shields.io/badge/GitHub-Repo-black">
+<img alt="Release" src="https://img.shields.io/badge/Release-1.0-green">
 
-Detecta la orientación del dispositivo utilizando el magnetómetro.
+</div>
 
-Muestra los grados en tiempo real.
+---
 
-Indica puntos cardinales.
+## 👨‍💻 Autores
 
-Obtiene coordenadas GPS en tiempo real.
+- Marcos Vallejo  
+- Cecilia Casas  
+- Joshua Murillo  
 
-Presenta un diseño temático tipo cartografía antigua (mapas náuticos estilo siglo XVII–XVIII).
+---
 
-Implementa animaciones suaves y filtros de estabilización de datos.
+## 📌 Descripción
 
-El proyecto fue desarrollado como parte de la Tarea 05 – Brújula.
+**Brújula del Explorador** es una aplicación móvil funcional que:
 
-# 🛠 Tecnologías Utilizadas
-# Desarrollo
+- Detecta la orientación del dispositivo utilizando el magnetómetro.
+- Muestra los grados en tiempo real.
+- Indica puntos cardinales.
+- Obtiene coordenadas GPS en tiempo real.
+- Presenta un diseño temático tipo cartografía antigua.
+- Implementa animaciones suaves y filtros de estabilización de datos.
 
-Flutter SDK (3.x)
+Proyecto desarrollado como parte de la **Tarea 05 – Brújula**.
 
-Dart (3.x)
+---
 
-Arquitectura modular por capas
+## 🛠 Tecnologías Utilizadas
 
-# Sensores y Funcionalidad
+### 📱 Desarrollo
+- Flutter SDK (3.x)
+- Dart (3.x)
+- Arquitectura modular por capas
 
-flutter_compass → Lectura del magnetómetro
+### 📡 Sensores y Funcionalidad
+- flutter_compass (magnetómetro / orientación)
+- geolocator (ubicación en tiempo real)
+- permission_handler (gestión de permisos)
+- AnimationController (animaciones)
+- Filtro de suavizado personalizado (smoothing)
 
-geolocator → Ubicación GPS en tiempo real
+### 🎨 Diseño
+- Material Design
+- Google Fonts (Great Vibes, Allura, Uncial Antiqua)
+- Assets personalizados (texturas tipo pergamino y mapas antiguos)
+- Componentes reutilizables
 
-permission_handler → Gestión de permisos
+### 🔧 Control de Versiones
+- Git
+- GitHub
 
-AnimationController → Animaciones
+---
 
-Filtro de suavizado personalizado (smoothing)
+## 📂 Estructura del Proyecto (lib/)
 
-# Diseño
-
-Material Design
-
-Google Fonts:
-
-Great Vibes
-
-Allura
-
-Uncial Antiqua
-
-Assets personalizados:
-
-Texturas tipo pergamino
-
-Fondo estilo mapa antiguo
-
-Componentes reutilizables
-
-# 🔧 Control de Versiones
-
-Git
-
-GitHub
-
-# 📂 Estructura del Proyecto (lib/)
+```bash
 lib/
-│
 ├── main.dart
 ├── app.dart
 │
@@ -108,47 +105,27 @@ lib/
     ├── smoothing.dart
     └── formatters.dart
 
-# 📸 Imágenes de la Aplicación
 
-Agrega aquí capturas reales:
-
-/assets/screenshots/start_screen.png
-/assets/screenshots/compass_screen.png
-/assets/screenshots/location_cards.png
-
-Y luego en el README:
-
-### Icono de app
-![Icon App](assets/screenshots/app_icon.png)
-
-### Vista de Inicio
-![Start Screen](assets/screenshots/start_screen.png)
-
-### Vista Brújula
-![Compass Screen](assets/screenshots/compass_screen.png)
-
-### Ubicación en Tiempo Real
-![Location](assets/screenshots/location_cards.png)
+📸 Imágenes de la Aplicación
+<div align="center"> <table> <tr> <td align="center"> <b>Vista de Inicio</b><br><br> <img src="assets/screenshots/start_screen.png" width="260" alt="Start Screen"/> </td> <td align="center"> <b>Vista Brújula</b><br><br> <img src="assets/screenshots/compass_screen.png" width="260" alt="Compass Screen"/> </td> </tr> <tr> <td align="center"> <b>Ubicación en Tiempo Real</b><br><br> <img src="assets/screenshots/location_cards.png" width="260" alt="Location Cards"/> </td> <td align="center"> <b>Icono de la App</b><br><br> <img src="assets/screenshots/app_icon.png" width="140" alt="App Icon"/> </td> </tr> </table> </div>
 📦 Release 1.0
 
-La versión estable de la aplicación se encuentra en:
+La versión estable se encuentra en:
 
-👉 Releases → v1.0
+Releases → v1.0
+
+Incluye:
 
 APK instalable para Android
 
-Compilado en modo release
+Compilación en modo release
 
-Para generar el APK:
-
+Generar APK
 flutter build apk --release
 
-El archivo generado se encuentra en:
+Ubicación del archivo generado:
 
 build/app/outputs/flutter-apk/app-release.apk
-
-
 🚀 Cómo Ejecutar el Proyecto
 flutter pub get
 flutter run
-
