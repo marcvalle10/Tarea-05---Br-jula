@@ -10,6 +10,7 @@ import '../widgets/animated_background.dart';
 import '../widgets/compass_dial.dart';
 import '../widgets/info_cards.dart';
 
+// Pantalla principal de la brujula: consume estado y compone UI.
 class CompassScreen extends StatefulWidget {
   const CompassScreen({super.key});
 
@@ -18,6 +19,7 @@ class CompassScreen extends StatefulWidget {
 }
 
 class _CompassScreenState extends State<CompassScreen> {
+  // Controlador con servicios concretos de sensores/permisos.
   late final CompassController _controller = CompassController(
     compassService: CompassService(),
     locationService: LocationService(),
@@ -27,11 +29,13 @@ class _CompassScreenState extends State<CompassScreen> {
   @override
   void initState() {
     super.initState();
+    // Inicia permisos y streams de datos.
     _controller.init();
   }
 
   @override
   void dispose() {
+    // Libera recursos reactivos al salir de pantalla.
     _controller.dispose();
     super.dispose();
   }
@@ -39,6 +43,7 @@ class _CompassScreenState extends State<CompassScreen> {
   @override
   Widget build(BuildContext context) {
     const Alignment dialAlignment = Alignment(0, 0.08);
+    // Estructura principal: fondo animado + estado reactivo + widgets de lectura.
     return Scaffold(
       body: AnimatedBackground(
         mode: BackgroundMode.compass,
@@ -51,11 +56,12 @@ class _CompassScreenState extends State<CompassScreen> {
               builder: (context, snap) {
                 final s = snap.data;
 
+                // Carga inicial mientras se publica el primer estado.
                 if (s == null) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                // Bloqueo duro: sin permiso o sin servicio
+                // Bloqueo duro: sin permiso o sin servicio.
                 if (!s.locationServiceEnabled || !s.hasPermission) {
                   return _PermissionBlock(
                     onRetry: () => _controller.refreshPermissions(),
@@ -65,6 +71,7 @@ class _CompassScreenState extends State<CompassScreen> {
                   );
                 }
 
+                // Datos formateados para presentar al usuario.
                 final heading = s.headingDeg;
                 final headingText = CoordinateFormatter.headingMain(heading);
                 final cardinal = CoordinateFormatter.headingCardinal(heading);
@@ -78,7 +85,19 @@ class _CompassScreenState extends State<CompassScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CompassDial(headingDeg: heading),
+                          SizedBox(
+                            width: 360,
+                            height: 360,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const _LightRing(size: 360),
+                                CompassDial(
+                                  headingDeg: heading,
+                                ), // (320x320) queda centrado por Stack
+                              ],
+                            ),
+                          ),
                           const SizedBox(height: 22),
                           _HeadingReadout(
                             heading: headingText,
@@ -106,6 +125,7 @@ class _CompassScreenState extends State<CompassScreen> {
   }
 }
 
+// Barra superior con navegacion y encabezado ornamental.
 class _TopBar extends StatelessWidget {
   final VoidCallback onBack;
 
@@ -113,6 +133,9 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
+    // Contenedor reutilizable para botones laterales.
     Widget box(Widget child) => Container(
       width: 42,
       height: 42,
@@ -136,22 +159,18 @@ class _TopBar extends StatelessWidget {
           children: [
             Text(
               'INSTRUMENTUM',
-              style: TextStyle(
-                fontSize: 10,
+              style: (tt.labelSmall ?? const TextStyle()).copyWith(
                 letterSpacing: 6,
                 fontStyle: FontStyle.italic,
-                color: AppColors.ink.withOpacity(0.60),
-                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'NAUTICUS XVIII',
-              style: TextStyle(
-                fontSize: 10,
-                letterSpacing: 2.5,
-                color: Colors.black.withOpacity(0.75),
+              style: (tt.labelSmall ?? const TextStyle()).copyWith(
+                letterSpacing: 2.6,
                 fontWeight: FontWeight.w900,
+                color: AppColors.ink.withOpacity(0.80),
               ),
             ),
           ],
@@ -162,6 +181,7 @@ class _TopBar extends StatelessWidget {
   }
 }
 
+// Lectura destacada de grados y cardinal.
 class _HeadingReadout extends StatelessWidget {
   final String heading;
   final String cardinal;
@@ -170,7 +190,35 @@ class _HeadingReadout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arena = AppColors.parchment.withOpacity(0.85);
+    final tt = Theme.of(context).textTheme;
+
+    // Color de brillo para mejorar contraste sobre pergamino.
+    final sand = AppColors.parchment.withOpacity(0.90);
+
+    final mainStyle = (tt.displayLarge ?? const TextStyle()).copyWith(
+      fontSize: 56,
+      fontWeight: FontWeight.w900,
+      height: 1.0,
+      fontStyle: FontStyle.italic,
+      color: AppColors.ink.withOpacity(0.92),
+      shadows: [
+        Shadow(color: sand.withOpacity(0.35), blurRadius: 14),
+        Shadow(color: sand.withOpacity(0.18), blurRadius: 28),
+        Shadow(color: Colors.black.withOpacity(0.22), blurRadius: 2),
+      ],
+    );
+
+    final cardinalStyle = (tt.titleLarge ?? const TextStyle()).copyWith(
+      fontSize: 34,
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 4,
+      color: sand.withOpacity(0.80),
+      shadows: [
+        Shadow(color: sand.withOpacity(0.40), blurRadius: 16),
+        Shadow(color: sand.withOpacity(0.20), blurRadius: 30),
+      ],
+    );
 
     return Column(
       children: [
@@ -178,46 +226,20 @@ class _HeadingReadout extends StatelessWidget {
         const SizedBox(height: 10),
         RichText(
           text: TextSpan(
-            style: TextStyle(
-              fontSize: 56,
-              height: 1.0,
-              fontWeight: FontWeight.w900,
-              color: Colors.black.withOpacity(0.78),
-              fontStyle: FontStyle.italic,
-              shadows: [
-                Shadow(color: arena.withOpacity(0.35), blurRadius: 14),
-                Shadow(color: arena.withOpacity(0.18), blurRadius: 28),
-                Shadow(color: Colors.black.withOpacity(0.25), blurRadius: 2),
-              ],
-            ),
+            style: mainStyle,
             children: [
               TextSpan(text: '$heading° '),
-              TextSpan(
-                text: cardinal,
-                style: TextStyle(
-                  fontSize: 34,
-                  fontStyle: FontStyle.normal,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 4,
-                  color: arena.withOpacity(0.75),
-                  shadows: [
-                    Shadow(color: arena.withOpacity(0.40), blurRadius: 16),
-                    Shadow(color: arena.withOpacity(0.20), blurRadius: 30),
-                  ],
-                ),
-              ),
+              TextSpan(text: cardinal, style: cardinalStyle),
             ],
           ),
         ),
         const SizedBox(height: 14),
         Text(
           'RUMBO DE NAVEGACIÓN',
-          style: TextStyle(
-            fontSize: 11,
+          style: (tt.labelSmall ?? const TextStyle()).copyWith(
             letterSpacing: 6,
             fontStyle: FontStyle.italic,
-            color: AppColors.ink.withOpacity(0.40),
-            fontWeight: FontWeight.w700,
+            color: AppColors.ink.withOpacity(0.45),
           ),
         ),
       ],
@@ -225,6 +247,7 @@ class _HeadingReadout extends StatelessWidget {
   }
 }
 
+// Mensaje de bloqueo cuando faltan permisos/servicio de ubicacion.
 class _PermissionBlock extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback onBack;
@@ -240,6 +263,9 @@ class _PermissionBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
+    // Mensaje segun la condicion que impide continuar.
     final msg = !serviceEnabled
         ? 'Activa el servicio de ubicación (GPS) para continuar.'
         : 'Permite ubicación “Mientras se usa” para ver latitud/longitud/altitud.';
@@ -253,8 +279,15 @@ class _PermissionBlock extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppColors.parchment2.withOpacity(0.65),
+                color: AppColors.parchment2.withOpacity(0.70),
                 border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.10),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -264,9 +297,10 @@ class _PermissionBlock extends StatelessWidget {
                   Text(
                     msg,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.ink.withOpacity(0.85),
-                      fontWeight: FontWeight.w800,
+                    style: (tt.bodyMedium ?? const TextStyle()).copyWith(
+                      color: AppColors.ink.withOpacity(0.90),
+                      fontWeight: FontWeight.w700,
+                      height: 1.35,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -280,6 +314,38 @@ class _PermissionBlock extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// Halo decorativo alrededor del dial para reforzar foco visual.
+class _LightRing extends StatelessWidget {
+  final double size;
+  const _LightRing({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    // Colores de halo suaves para resaltar el dial.
+    final glow = AppColors.parchment.withOpacity(0.35);
+    final glow2 = AppColors.bronze.withOpacity(0.25);
+
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          // aro + halo
+          border: Border.all(
+            color: AppColors.parchment2.withOpacity(0.35),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(color: glow, blurRadius: 26, spreadRadius: 2),
+            BoxShadow(color: glow2, blurRadius: 40, spreadRadius: 0),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+// Encabezado reutilizable con escudo, titulo y subtitulo.
 class UnisonHeader extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -9,6 +10,9 @@ class UnisonHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+
+    // Composicion vertical del encabezado institucional.
     return Column(
       children: [
         Image.asset(
@@ -20,7 +24,7 @@ class UnisonHeader extends StatelessWidget {
         Text(
           title.toUpperCase(),
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: (tt.headlineMedium ?? const TextStyle()).copyWith(
             fontSize: 30,
             height: 1.0,
             letterSpacing: 1.5,
@@ -33,12 +37,12 @@ class UnisonHeader extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           subtitle.toUpperCase(),
-          style: TextStyle(
+          style: (tt.labelSmall ?? const TextStyle()).copyWith(
             fontSize: 10,
             letterSpacing: 6,
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.w800,
-            color: AppColors.ink.withOpacity(0.50),
+            color: AppColors.ink.withOpacity(0.55),
           ),
         ),
       ],

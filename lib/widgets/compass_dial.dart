@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
-import '../utils/smoothing.dart';
 
+// Widget del dial de brujula con rosa, aguja y animacion de giro.
 class CompassDial extends StatefulWidget {
   final double? headingDeg; // ya suavizado (0..360)
   const CompassDial({super.key, required this.headingDeg});
@@ -11,46 +12,33 @@ class CompassDial extends StatefulWidget {
   State<CompassDial> createState() => _CompassDialState();
 }
 
-class _CompassDialState extends State<CompassDial>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 180),
-  );
-
-  Animation<double>? _anim;
-  double _prev = 0;
+class _CompassDialState extends State<CompassDial> {
+  // turns acumulado para que AnimatedRotation no “salte” al cruzar 0/360.
+  double _turns = 0.0;
+  double? _prevDeg;
 
   @override
   void didUpdateWidget(covariant CompassDial oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Convierte el cambio angular en delta corto y acumula vueltas.
     final nextDeg = widget.headingDeg;
     if (nextDeg == null) return;
 
-    final prev = _prev;
-    final next = AngleSmoother.shortestPathNext(prev, nextDeg);
-    _prev = AngleSmoother.clamp360(next);
+    final prev = _prevDeg ?? nextDeg;
+    final delta = (((nextDeg - prev + 540) % 360) - 180); // -180..180
+    _prevDeg = nextDeg;
 
-    final from = -AngleSmoother.degToRad(prev);
-    final to = -AngleSmoother.degToRad(next);
-
-    _anim = Tween<double>(
-      begin: from,
-      end: to,
-    ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOut));
-
-    _c.forward(from: 0);
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
+    // El dial rota en sentido contrario al heading (como antes: angle = -degToRad()).
+    // Convertimos delta en turns acumulados.
+    setState(() {
+      _turns += (-delta / 360.0);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Capas del dial: lineas, rosa, aguja y letra cardinal fija.
     return SizedBox(
       width: 320,
       height: 320,
@@ -65,19 +53,15 @@ class _CompassDialState extends State<CompassDial>
             ),
           ),
 
-          // Rosa rotando
-          AnimatedBuilder(
-            animation: _c,
-            builder: (_, __) {
-              final a = _anim?.value ?? 0.0;
-              return Transform.rotate(
-                angle: a,
-                child: CustomPaint(
-                  size: const Size(320, 320),
-                  painter: _WindRosePainter(),
-                ),
-              );
-            },
+          // Rosa rotando (animación implícita)
+          AnimatedRotation(
+            turns: _turns,
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutCubic,
+            child: CustomPaint(
+              size: const Size(320, 320),
+              painter: _WindRosePainter(),
+            ),
           ),
 
           // Aguja estática
@@ -86,52 +70,26 @@ class _CompassDialState extends State<CompassDial>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CustomPaint(size: const Size(20, 70), painter: _NeedleTop()),
-                Container(
-                  width: 2,
-                  height: 170,
-                  color: Colors.black.withOpacity(0.18),
-                ),
-                CustomPaint(size: const Size(16, 45), painter: _NeedleBottom()),
+                const SizedBox(height: 10),
+                CustomPaint(size: const Size(20, 70), painter: _NeedleBottom()),
               ],
             ),
           ),
 
-          // Tuerca central
-          Container(
-            width: 22,
-            height: 22,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.black.withOpacity(0.65),
-                  AppColors.bronze.withOpacity(0.85),
+          // Texto N fijo
+          Positioned(
+            top: 16,
+            child: Text(
+              'N',
+              style: GoogleFonts.uncialAntiqua(
+                fontSize: 24,
+                color: AppColors.ink.withOpacity(0.9),
+                shadows: [
+                  Shadow(
+                    color: AppColors.glowSand.withOpacity(0.28),
+                    blurRadius: 14,
+                  ),
                 ],
-              ),
-              border: Border.all(color: Colors.black.withOpacity(0.25)),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.bronze.withOpacity(0.18),
-                  blurRadius: 10,
-                  spreadRadius: 0,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.30),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Container(
-                width: 7,
-                height: 7,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.18),
-                ),
               ),
             ),
           ),
@@ -141,6 +99,7 @@ class _CompassDialState extends State<CompassDial>
   }
 }
 
+// Lineas radiales de fondo (loxodromas decorativas).
 class _RadialLinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -167,6 +126,7 @@ class _RadialLinesPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// Pintor principal de la rosa de los vientos.
 class _WindRosePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -241,11 +201,10 @@ class _WindRosePainter extends CustomPainter {
     void drawText(String s, Offset pos, double fs, FontWeight w) {
       tp.text = TextSpan(
         text: s,
-        style: TextStyle(
-          fontFamily: 'CormorantGaramond',
+        style: GoogleFonts.uncialAntiqua(
           fontSize: fs,
           fontWeight: w,
-          color: Colors.black.withOpacity(0.78),
+          color: AppColors.ink.withOpacity(0.92),
           shadows: [
             Shadow(color: AppColors.bronze.withOpacity(0.22), blurRadius: 10),
             Shadow(color: Colors.black.withOpacity(0.22), blurRadius: 2),
@@ -285,6 +244,7 @@ class _WindRosePainter extends CustomPainter {
     double width, {
     required bool isMain,
   }) {
+    // Dibuja una punta principal o secundaria de la rosa.
     final dir = Offset(cos(ang), sin(ang));
     final ort = Offset(-sin(ang), cos(ang));
     final tip = c + dir * length;
@@ -342,6 +302,7 @@ class _WindRosePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// Mitad superior de la aguja (bronce).
 class _NeedleTop extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -374,6 +335,7 @@ class _NeedleTop extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// Mitad inferior de la aguja (contraste oscuro).
 class _NeedleBottom extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

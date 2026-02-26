@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+// Fondo animado reutilizable para splash y pantalla de brujula.
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
   final BackgroundMode mode;
@@ -21,10 +22,12 @@ class AnimatedBackground extends StatefulWidget {
   State<AnimatedBackground> createState() => _AnimatedBackgroundState();
 }
 
+// Variante visual del fondo segun pantalla.
 enum BackgroundMode { splash, compass }
 
 class _AnimatedBackgroundState extends State<AnimatedBackground>
     with SingleTickerProviderStateMixin {
+  // Anima particulas/polvo del fondo.
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 10),
@@ -32,6 +35,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
 
   @override
   void dispose() {
+    // Libera animacion de fondo.
     _c.dispose();
     super.dispose();
   }
@@ -40,6 +44,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   Widget build(BuildContext context) {
     final hasWood = widget.mode == BackgroundMode.splash;
 
+    // Capas: base, mapa (opcional), vignette, particulas y contenido.
     return Stack(
       clipBehavior: Clip.none, // CLAVE: evita recorte al rotar/cover
       children: [
@@ -121,12 +126,14 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
   }
 }
 
+// Pintor de polvo ambiente con desplazamiento horizontal continuo.
 class _DustPainter extends CustomPainter {
   final double t;
   _DustPainter({required this.t});
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Particulas pseudoaleatorias deterministas para evitar allocations extras.
     final paint = Paint()..color = AppColors.parchment2.withOpacity(0.03);
     for (var i = 0; i < 70; i++) {
       final dx = (size.width * ((i * 37) % 100) / 100.0) + (t * 120);
